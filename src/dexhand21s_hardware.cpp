@@ -10,10 +10,9 @@
 // use and change right, except distributing this library separately
 // of their product.
 
-//TODO use namespaces so u dont have to repeat hardware_interface::
+// TODO use namespaces so u dont have to repeat hardware_interface::
 
 #include "dexhand21s_hardware/dexhand21s_hardware.hpp"
-
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -26,29 +25,21 @@ namespace dexhand21s_hardware
 
 void CallbackFunc(const DX21StatusRxData * status)
 {
-  printf("Position1 = %d, Speed1 = %d, Current1=%d, MT Temp1=%d\n"
-      , status->MotorHallValue(1)
-      , status->MotorVelocity(1)
-      , status->MotorCurrent(1)
-      , status->MotorTemperature(1));
+  printf(
+    "Position1 = %d, Speed1 = %d, Current1=%d, MT Temp1=%d\n", status->MotorHallValue(1),
+    status->MotorVelocity(1), status->MotorCurrent(1), status->MotorTemperature(1));
 
-  printf("Position2 = %d, Speed2 = %d, Current2=%d, MT Temp2=%d\n"
-      , status->MotorHallValue(2)
-      , status->MotorVelocity(2)
-      , status->MotorCurrent(2)
-      , status->MotorTemperature(2));
+  printf(
+    "Position2 = %d, Speed2 = %d, Current2=%d, MT Temp2=%d\n", status->MotorHallValue(2),
+    status->MotorVelocity(2), status->MotorCurrent(2), status->MotorTemperature(2));
 
-  printf("Position3 = %d, Speed3 = %d, Current3=%d, MT Temp3=%d\n"
-      , status->MotorHallValue(3)
-      , status->MotorVelocity(3)
-      , status->MotorCurrent(3)
-      , status->MotorTemperature(3));
+  printf(
+    "Position3 = %d, Speed3 = %d, Current3=%d, MT Temp3=%d\n", status->MotorHallValue(3),
+    status->MotorVelocity(3), status->MotorCurrent(3), status->MotorTemperature(3));
 
-  printf("Position4 = %d, Speed4 = %d, Current4=%d, MT Temp4=%d\n"
-      , status->MotorHallValue(4)
-      , status->MotorVelocity(4)
-      , status->MotorCurrent(4)
-      , status->MotorTemperature(4));
+  printf(
+    "Position4 = %d, Speed4 = %d, Current4=%d, MT Temp4=%d\n", status->MotorHallValue(4),
+    status->MotorVelocity(4), status->MotorCurrent(4), status->MotorTemperature(4));
 
   printf("\n");
 }
@@ -67,7 +58,7 @@ hardware_interface::CallbackReturn DexHand21sHW::on_init(
   const AdapterType atype = AdapterType::ZLG_MINI;
   const auto device_ = DexHand::createInstance(ProductType::DX021_S, atype, 0);
   hand_ = std::dynamic_pointer_cast<DexHand_021S>(device_);
-  
+
   if (!hand_)
   {
     RCLCPP_FATAL(get_logger(), "Failed to create DexHand instance.");
@@ -103,7 +94,8 @@ hardware_interface::CallbackReturn DexHand21sHW::on_init(
       return hardware_interface::CallbackReturn::ERROR;
     }
 
-    uint8_t finger_id = static_cast<uint8_t>(std::stoi(joint.parameters.at("finger_id"), nullptr, 0));
+    uint8_t finger_id =
+      static_cast<uint8_t>(std::stoi(joint.parameters.at("finger_id"), nullptr, 0));
     joint_finger_ids_[joint.name + "/position"] = finger_id;
     RCLCPP_INFO(get_logger(), "Joint '%s' -> finger_id: %d", joint.name.c_str(), finger_id);
   }
@@ -137,14 +129,13 @@ hardware_interface::CallbackReturn DexHand21sHW::on_configure(
     set_command(name, 0.0);
   }
   RCLCPP_INFO(get_logger(), "Successfully configured!");
-  
+
   return CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn DexHand21sHW::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-
   // command and state should be equal when starting
   for (const auto & [name, descr] : joint_state_interfaces_)
   {
@@ -179,8 +170,10 @@ hardware_interface::return_type DexHand21sHW::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   for (const auto & [name, descr] : joint_command_interfaces_)
-  { 
-    hand_->moveFinger(device_id_, joint_finger_ids_[name], 0x03,  static_cast<int16_t>(get_command(name)), 1500, HALL_POSLIMIT_CONTROL_MODE, 10);
+  {
+    hand_->moveFinger(
+      device_id_, joint_finger_ids_[name], 0x03, static_cast<int16_t>(get_command(name)), 1500,
+      HALL_POSLIMIT_CONTROL_MODE, 10);
   }
   // hand_->clearFirmwareError(device_id_, 0x00);
 
@@ -191,5 +184,4 @@ hardware_interface::return_type DexHand21sHW::write(
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(
-  dexhand21s_hardware::DexHand21sHW, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(dexhand21s_hardware::DexHand21sHW, hardware_interface::SystemInterface)
