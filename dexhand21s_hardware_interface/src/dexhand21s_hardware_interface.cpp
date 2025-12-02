@@ -12,7 +12,7 @@
 
 // TODO use namespaces so u dont have to repeat hardware_interface::
 
-#include "dexhand21s_hardware/dexhand21s_hardware.hpp"
+#include "dexhand21s_hardware_interface/dexhand21s_hardware_interface.hpp"
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -20,7 +20,7 @@
 using namespace DexRobot;
 using namespace DexRobot::Dex021;
 
-namespace dexhand21s_hardware
+namespace dexhand21s_hardware_interface
 {
 
 void CallbackFunc(const DX21StatusRxData * status)
@@ -44,7 +44,7 @@ void CallbackFunc(const DX21StatusRxData * status)
   printf("\n");
 }
 
-hardware_interface::CallbackReturn DexHand21sHW::on_init(
+hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
   const hardware_interface::HardwareComponentInterfaceParams & params)
 {
   if (
@@ -102,7 +102,7 @@ hardware_interface::CallbackReturn DexHand21sHW::on_init(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn DexHand21sHW::on_configure(
+hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
   device_id_ = 0x01;
@@ -133,7 +133,7 @@ hardware_interface::CallbackReturn DexHand21sHW::on_configure(
   return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn DexHand21sHW::on_activate(
+hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
   // command and state should be equal when starting
@@ -148,7 +148,7 @@ hardware_interface::CallbackReturn DexHand21sHW::on_activate(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn DexHand21sHW::on_deactivate(
+hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_deactivate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
   hand_->clearFirmwareError(device_id_, 0x00);
@@ -160,13 +160,13 @@ hardware_interface::CallbackReturn DexHand21sHW::on_deactivate(
   return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type DexHand21sHW::read(
+hardware_interface::return_type DexHand21sHardwareInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type DexHand21sHW::write(
+hardware_interface::return_type DexHand21sHardwareInterface::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   for (const auto & [name, descr] : joint_command_interfaces_)
@@ -180,8 +180,9 @@ hardware_interface::return_type DexHand21sHW::write(
   return hardware_interface::return_type::OK;
 }
 
-}  // namespace dexhand21s_hardware
+}  // namespace dexhand21s_hardware_interface
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(dexhand21s_hardware::DexHand21sHW, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(
+  dexhand21s_hardware_interface::DexHand21sHardwareInterface, hardware_interface::SystemInterface)

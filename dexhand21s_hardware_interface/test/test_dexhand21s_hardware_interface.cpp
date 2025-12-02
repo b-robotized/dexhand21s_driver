@@ -18,17 +18,17 @@
 #include "ros2_control_test_assets/components_urdfs.hpp"
 #include "ros2_control_test_assets/descriptions.hpp"
 
-class TestDexHand21sHW : public ::testing::Test
+class TestDexHand21sHardwareInterface : public ::testing::Test
 {
 protected:
   void SetUp() override
   {
     // TODO(anyone): Extend this description to your robot
-    dexhand21s_hardware_2dof_ =
+    dexhand21s_hardware_interface_2dof_ =
       R"(
-        <ros2_control name="DexHand21sHW2dof" type="system">
+        <ros2_control name="DexHand21sHardwareInterface2dof" type="system">
           <hardware>
-            <plugin>dexhand21s_hardware/DexHand21sHW</plugin>
+            <plugin>dexhand21s_hardware_interface/DexHand21sHardwareInterface</plugin>
           </hardware>
           <joint name="joint1">
             <command_interface name="position"/>
@@ -47,7 +47,7 @@ protected:
   std::string dexhand21s_hardware_2dof_;
 };
 
-TEST_F(TestDexHand21sHW, load_dexhand21s_hardware_2dof)
+TEST_F(TestDexHand21sHardwareInterface, load_dexhand21s_hardware_2dof)
 {
   auto urdf = ros2_control_test_assets::urdf_head + dexhand21s_hardware_2dof_ +
               ros2_control_test_assets::urdf_tail;

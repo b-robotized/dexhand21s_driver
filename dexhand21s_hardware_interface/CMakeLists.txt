@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(dexhand21s_hardware)
+project(dexhand21s_hardware_interface)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra -Werror=conversion -Werror=unused-but-set-variable -Werror=return-type -Werror=shadow)
@@ -53,39 +53,39 @@ message(STATUS "Using USBCAN_LIBRARY library: ${USBCAN_LIBRARY}")
 message(STATUS "Using DexHand headers: ${DEXHAND_INCLUDE_DIR}")
 
 add_library(
-  dexhand21s_hardware
+  dexhand21s_hardware_interface
   SHARED
-  src/dexhand21s_hardware.cpp
+  src/dexhand21s_hardware_interface.cpp
 )
 target_include_directories(
-  dexhand21s_hardware
+  dexhand21s_hardware_interface
   PUBLIC
   include
   ${DEXHAND_INCLUDE_DIR}
 )
 ament_target_dependencies(
-  dexhand21s_hardware
+  dexhand21s_hardware_interface
   hardware_interface
   rclcpp
   rclcpp_lifecycle
 )
 
 # Link your driver library
-target_link_libraries(dexhand21s_hardware
+target_link_libraries(dexhand21s_hardware_interface
   ${DEXHAND_LIBRARY}
   ${SERIAL_LIBRARY}
   ${USBCAN_LIBRARY}
 )
 
 # prevent pluginlib from using boost
-target_compile_definitions(dexhand21s_hardware PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+target_compile_definitions(dexhand21s_hardware_interface PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 pluginlib_export_plugin_description_file(
-  hardware_interface dexhand21s_hardware.xml)
+  hardware_interface dexhand21s_hardware_interface.xml)
 
 install(
   TARGETS
-  dexhand21s_hardware
+  dexhand21s_hardware_interface
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -98,10 +98,10 @@ install(
 
 if(FALSE)
 
-  ament_add_gmock(test_dexhand21s_hardware test/test_dexhand21s_hardware.cpp)
-  target_include_directories(test_dexhand21s_hardware PRIVATE include)
+  ament_add_gmock(test_dexhand21s_hardware_interface test/test_dexhand21s_hardware_interface.cpp)
+  target_include_directories(test_dexhand21s_hardware_interface PRIVATE include)
   ament_target_dependencies(
-    test_dexhand21s_hardware
+    test_dexhand21s_hardware_interface
     hardware_interface
     pluginlib
     ros2_control_test_assets
@@ -112,7 +112,7 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  dexhand21s_hardware
+  dexhand21s_hardware_interface
 )
 ament_export_dependencies(
   hardware_interface

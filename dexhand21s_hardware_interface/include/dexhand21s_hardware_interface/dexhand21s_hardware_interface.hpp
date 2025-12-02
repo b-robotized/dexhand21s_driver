@@ -10,8 +10,8 @@
 // use and change right, except distributing this library separately
 // of their product.
 
-#ifndef dexhand21s_hardware__DEXHAND21S_HARDWARE_HPP_
-#define dexhand21s_hardware__DEXHAND21S_HARDWARE_HPP_
+#ifndef dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#define dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
 
 #include <cstring>
 #include <iostream>
@@ -30,12 +30,12 @@
 
 #include "DexHand.h"
 
-namespace dexhand21s_hardware
+namespace dexhand21s_hardware_interface
 {
-class DexHand21sHW : public hardware_interface::SystemInterface
+class DexHand21sHardwareInterface : public hardware_interface::SystemInterface
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(DexHand21sHW)
+  RCLCPP_SHARED_PTR_DEFINITIONS(DexHand21sHardwareInterface)
 
   hardware_interface::CallbackReturn on_init(
     const hardware_interface::HardwareComponentInterfaceParams & params) override;
@@ -63,6 +63,6 @@ private:
   std::map<std::string, uint8_t> joint_finger_ids_;
 };
 
-}  // namespace dexhand21s_hardware
+}  // namespace dexhand21s_hardware_interface
 
-#endif  // dexhand21s_hardware__DEXHAND21S_HARDWARE_HPP_
+#endif  // dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
