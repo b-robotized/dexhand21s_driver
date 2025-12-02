@@ -3,8 +3,6 @@ dexhand21s_bringup
 
 Bringup package for dexhand.
 
-![Licence](https://img.shields.io/badge/License-Copyright-blue.svg)
-
 
 ## General details about robot bringup packages
 

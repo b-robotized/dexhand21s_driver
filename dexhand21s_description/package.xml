@@ -6,6 +6,9 @@
   <description>Package with URDF and description files of test robots.</description>
 
   <maintainer email="yara.shahin@b-robotized.com">Yara Shahin</maintainer>
+  <maintainer email="denis.stogl@b-robotized.com">Dr.-Ing. Denis Štogl</maintainer>
+
+  <author email="yara.shahin@b-robotized.com">Yara Shahin</author>
 
   <license>Apache-2.0</license>
 

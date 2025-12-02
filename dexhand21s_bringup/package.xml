@@ -4,7 +4,12 @@
   <name>dexhand21s_bringup</name>
   <version>0.0.0</version>
   <description>Bringup package for dexhand.</description>
+
   <maintainer email="yara.shahin@b-robotized.com">Yara Shahin</maintainer>
+  <maintainer email="denis.stogl@b-robotized.com">Dr.-Ing. Denis Štogl</maintainer>
+
+  <author email="yara.shahin@b-robotized.com">Yara Shahin</author>
+
   <license>Copyright (c) 2025, b-robotized</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
