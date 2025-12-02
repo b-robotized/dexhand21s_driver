@@ -33,7 +33,7 @@
     <limit lower="0" upper="1200" effort="10" velocity="1.0"/>
   </joint>
 
-  <!-- Finger 1 
+  <!-- Finger 1
   <link name="link_f_1_2"/>
   <joint name="joint_f_1_2" type="revolute">
     <origin xyz="-0.03270 -0.00017 0.11840" rpy="1.5708 -0.9115 3.1416"/>
@@ -52,7 +52,7 @@
     <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
   </joint>-->
 
-  <!-- Finger 2 
+  <!-- Finger 2
   <link name="link_f_2_1"/>
   <joint name="joint_f_2_1" type="revolute">
     <origin xyz="0.02293 0.02487 0.12211" rpy="0 0 0"/>
@@ -80,7 +80,7 @@
     <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
   </joint>-->
 
-  <!-- Finger 3 
+  <!-- Finger 3
   <link name="link_f_3_1"/>
   <joint name="joint_f_3_1" type="revolute">
     <origin xyz="0.02293 -0.02513 0.12211" rpy="-3.1416 0 0"/>
