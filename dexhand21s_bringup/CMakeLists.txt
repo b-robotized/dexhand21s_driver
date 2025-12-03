@@ -7,6 +7,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(dexhand21s_hardware_interface REQUIRED)
+find_package(dexhand21s_description REQUIRED)
 
 install(
   DIRECTORY config launch urdf

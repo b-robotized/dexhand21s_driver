@@ -25,7 +25,7 @@ message(STATUS "Detected architecture: ${DEXHAND_ARCH}")
 
 # Find the DexHand SDK
 # Adjust this path to match your workspace structure
-set(DEXHAND_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../dexhand_sdk_cpp" CACHE PATH "Path to DexHand SDK")
+set(DEXHAND_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../dexhand_sdk_cpp" CACHE PATH "Path to DexHand SDK")
 
 # Check if SDK exists
 if(NOT EXISTS ${DEXHAND_SDK_PATH})
