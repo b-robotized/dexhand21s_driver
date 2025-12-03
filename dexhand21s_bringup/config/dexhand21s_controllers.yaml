@@ -26,17 +26,17 @@ controller_manager:
 forward_position_controller:
   ros__parameters:
     joints:
-      - joint1
-      - joint2
-      - joint3
+      - joint_f_1_2
+      - joint_f_2_2
+      - joint_f_3_2
     interface_name: position
 
 joint_trajectory_controller:
   ros__parameters:
     joints:
-      - joint1
-      - joint2
-      - joint3
+      - joint_f_1_2
+      - joint_f_2_2
+      - joint_f_3_2
 
     command_interfaces:
       - position

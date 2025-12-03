@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="dexhand_ros2_control" params="name">
+  <xacro:macro name="dexhand21s_ros2_control" params="name">
 
     <ros2_control name="${name}" type="system">
       <hardware>
         <plugin>dexhand21s_hardware_interface/DexHand21sHardwareInterface</plugin>
       </hardware>
 
-      <joint name="joint1">
+      <joint name="joint_f_1_2">
         <param name="finger_id">1</param>
         <command_interface name="position"/>
         <state_interface name="position"/>
       </joint>
 
-      <joint name="joint2">
+      <joint name="joint_f_2_2">
         <param name="finger_id">2</param>
         <command_interface name="position"/>
         <state_interface name="position"/>
       </joint>
 
-      <joint name="joint3">
+      <joint name="joint_f_3_2">
         <param name="finger_id">3</param>
         <command_interface name="position"/>
         <state_interface name="position"/>
