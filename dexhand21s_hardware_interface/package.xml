@@ -17,6 +17,7 @@
 
   <depend>backward_ros</depend>
   <depend>hardware_interface</depend>
+  <depend>libserial-dev</depend>
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
