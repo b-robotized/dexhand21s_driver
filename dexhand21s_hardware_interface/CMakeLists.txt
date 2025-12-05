@@ -24,14 +24,8 @@ endforeach()
 # TODO remove
 set(DEXHAND_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../dexhand_sdk_cpp" CACHE PATH "Path to DexHand SDK")
 
-# Check if SDK exists
-if(NOT EXISTS ${DEXHAND_SDK_PATH})
-  message(FATAL_ERROR "DexHand SDK not found at: ${DEXHAND_SDK_PATH}")
-endif()
-
 # Set library and include paths
 set(DEXHAND_LIBRARY "${DEXHAND_SDK_PATH}/lib/linux/x86_64/libdexhand.so")
-set(SERIAL_LIBRARY "${DEXHAND_SDK_PATH}/lib/linux/x86_64/libserial.so.1")
 set(USBCAN_LIBRARY "${DEXHAND_SDK_PATH}/lib/linux/x86_64/libusbcanfd.so.1.0.8")
 set(DEXHAND_INCLUDE_DIR "${DEXHAND_SDK_PATH}/include")
 
@@ -53,8 +47,8 @@ target_link_libraries(dexhand21s_hardware_interface PUBLIC
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
   ${DEXHAND_LIBRARY}
-  ${SERIAL_LIBRARY}
   ${USBCAN_LIBRARY}
+  serial
   # dexhand_vendor::dexhand_vendor
 )
 
