@@ -20,9 +20,6 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-using namespace DexRobot;
-using namespace DexRobot::Dex021;
-
 namespace dexhand21s_hardware_interface
 {
 
@@ -233,8 +230,9 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
     RCLCPP_INFO(get_logger(), "Joint '%s' -> finger_id: %d", joint.name.c_str(), finger_id);
   }
 
-  const auto device_ = DexHand::createInstance(ProductType::DX021_S, AdapterType::ZLG_MINI, 0);
-  hand_ = std::dynamic_pointer_cast<DexHand_021S>(device_);
+  const auto device_ = DexRobot::Dex021::DexHand::createInstance(
+    DexRobot::Dex021::ProductType::DX021_S, DexRobot::Dex021::AdapterType::ZLG_MINI, 0);
+  hand_ = std::dynamic_pointer_cast<DexRobot::Dex021::DexHand_021S>(device_);
 
   if (!hand_)
   {
@@ -248,7 +246,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
 hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  DH21StatusRxCallBack callback =
+  DexRobot::Dex021::DH21StatusRxCallBack callback =
     std::bind(&DexHand21sHardwareInterface::stateCallbackFunc, this, std::placeholders::_1);
   hand_->setStatusRxCallback(callback);
 
@@ -267,7 +265,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  hand_->setHandId(AdapterChannel::CHN0, device_id_);
+  hand_->setHandId(DexRobot::Dex021::AdapterChannel::CHN0, device_id_);
   hand_->setRealtimeResponse(device_id_, 0x00, sampling_rate_, 1);
 
   auto firmwareVersion = hand_->getFirmwareVersion(device_id_, 0x00);
@@ -351,7 +349,7 @@ hardware_interface::return_type DexHand21sHardwareInterface::write(
     int16_t hall_val = radToHall(finger_id, get_command(joint_position_itfs_[i]));
     hand_->moveFinger(
       device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val, angular_velocity_ * 100,
-      HALL_POSLIMIT_CONTROL_MODE, 10);
+      DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
   }
 
   return hardware_interface::return_type::OK;

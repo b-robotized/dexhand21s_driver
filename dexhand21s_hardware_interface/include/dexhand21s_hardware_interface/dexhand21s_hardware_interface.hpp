@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
-#define dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#ifndef DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#define DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
 
 #include <cstring>
 #include <iostream>
@@ -92,4 +92,4 @@ private:
 
 }  // namespace dexhand21s_hardware_interface
 
-#endif  // dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#endif  // DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
