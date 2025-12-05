@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dexhand21s">
 
-  <xacro:include filename="$(find dexhand21s_description)/urdf/dexhand21s.urdf.xacro"/>
+  <xacro:include filename="$(find dexhand21s_description)/urdf/dexhand21s_macro.urdf.xacro"/>
   <xacro:include filename="$(find dexhand21s_bringup)/urdf/dexhand21s.ros2_control.xacro"/>
 
   <xacro:dexhand21s name="DexHand21S"/>

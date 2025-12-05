@@ -13,6 +13,11 @@ Plugin: dexhand21s_hardware_interface/DexHand21sHardwareInterface (hardware_inte
 
 The interface automatically scales the internal hall readings to expose only rad in state and command interfaces.
 
+## Limitations
+
+- Only AdapterType::ZLG_MINI is supported.
+- Commanding and reading the driving joints of the three fingers. Can't find the fourth joint.
+
 ## Resources
 
 - Product Info: https://dexrobot.feishu.cn/file/YXD2bx4kmo8Zs4xLmPDcdD00nzd

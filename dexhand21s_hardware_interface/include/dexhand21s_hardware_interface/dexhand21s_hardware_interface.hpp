@@ -57,12 +57,28 @@ public:
   hardware_interface::return_type write(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+  static constexpr size_t DEXHAND21S_JOINT_COUNT = 3;
+  static constexpr int16_t MIN_HALL_POSITION = 0;
+  static constexpr int16_t MAX_HALL_POSITION = 1000;
+  static constexpr double MIN_RAD_POSITION = 0.0;
+  static constexpr double MAX_RAD_POSITION = 1.3;
+
 private:
   // Hardware handle
   std::shared_ptr<DexRobot::Dex021::DexHand_021S> hand_;
-  uint8_t device_id_;
+  uint8_t device_id_ = 0x01;
+  int16_t angular_velocity_ = 10;
+  uint16_t sampling_rate_ = 50;
 
-  std::map<std::string, uint8_t> joint_finger_ids_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_position_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_velocity_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_temperature_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_current_itfs_;
+
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_position_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_velocity_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_temperature_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_current_states_{0.0, 0.0, 0.0};
 };
 
 }  // namespace dexhand21s_hardware_interface
