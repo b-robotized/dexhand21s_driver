@@ -27,7 +27,7 @@ namespace dexhand21s_hardware_interface
 {
 
 // Converts hall sensor value to radians for a given finger
-double hallToRad(int finger_id, int16_t hall_value)
+double DexHand21sHardwareInterface::hallToRad(int finger_id, int16_t hall_value)
 {
   // if finger 1, then 0 - 1000 is 0.0 to -1.3 (clipped)
   // else, then 0 - 1000 is 0.0 to 1.3 (clipped)
@@ -57,7 +57,7 @@ double hallToRad(int finger_id, int16_t hall_value)
   return 0.0;
 }
 
-int16_t radToHall(int finger_id, double rad_value)
+int16_t DexHand21sHardwareInterface::radToHall(int finger_id, double rad_value)
 {
   // if finger 1, then 0 - 1000 is 0.0 to -1.3 (clipped)
   // else, then 0 - 1000 is 0.0 to 1.3 (clipped)
@@ -97,7 +97,8 @@ int16_t radToHall(int finger_id, double rad_value)
   return 0.0;
 }
 
-void stateCallbackFunc(const DX21StatusRxData * status)
+void DexHand21sHardwareInterface::stateCallbackFunc(
+  const DexRobot::Dex021::DX21StatusRxData * status)
 {
   joint_position_states_ = {
     hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
@@ -130,19 +131,19 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
   // default device_id_ = 0x01
   if (hw_params.find("device_id") != hw_params.end())
   {
-    device_id_ = std::stoi(hw_params.at("device_id"));
+    device_id_ = static_cast<uint8_t>(std::stoi(hw_params.at("device_id")));
   }
 
   // default angular_velocity_ = 10 rad/s
   if (hw_params.find("angular_velocity") != hw_params.end())
   {
-    angular_velocity_ = std::stoi(hw_params.at("angular_velocity"));
+    angular_velocity_ = static_cast<int16_t>(std::stoi(hw_params.at("angular_velocity")));
   }
 
   // default sampling_rate_ = 50 Hz
   if (hw_params.find("sampling_rate") != hw_params.end())
   {
-    sampling_rate_ = std::stoi(hw_params.at("sampling_rate"));
+    sampling_rate_ = static_cast<uint16_t>(std::stoi(hw_params.at("sampling_rate")));
   }
 
   if (info_.joints.size() != DEXHAND21S_JOINT_COUNT)
@@ -247,7 +248,8 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
 hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  DH21StatusRxCallBack callback = std::bind(stateCallbackFunc, std::placeholders::_1);
+  DH21StatusRxCallBack callback =
+    std::bind(&DexHand21sHardwareInterface::stateCallbackFunc, this, std::placeholders::_1);
   hand_->setStatusRxCallback(callback);
 
   RCLCPP_INFO(get_logger(), "Connecting to Dex Hand...");
@@ -281,11 +283,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_activate(
 {
   try
   {
-    if (!hand_->clearFirmwareError(device_id_, 0x00))
-    {
-      RCLCPP_FATAL(get_logger(), "Failed to clear errors on Dex Hand.");
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+    hand_->clearFirmwareError(device_id_, 0x00);
   }
   catch (const std::exception & e)
   {
@@ -347,13 +345,13 @@ hardware_interface::return_type DexHand21sHardwareInterface::read(
 hardware_interface::return_type DexHand21sHardwareInterface::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  for (size_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
+  for (uint8_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
-    int finger_id = i + 1;
+    uint8_t finger_id = i + 1;
     int16_t hall_val = radToHall(finger_id, get_command(joint_position_itfs_[i]));
     hand_->moveFinger(
-      device_id_, finger_id, 0x03, hall_val, angular_velocity_ * 100, HALL_POSLIMIT_CONTROL_MODE,
-      10);
+      device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val, angular_velocity_ * 100,
+      HALL_POSLIMIT_CONTROL_MODE, 10);
   }
 
   return hardware_interface::return_type::OK;

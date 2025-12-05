@@ -51,6 +51,9 @@ public:
   hardware_interface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
+  hardware_interface::CallbackReturn on_cleanup(
+    const rclcpp_lifecycle::State & previous_state) override;
+
   hardware_interface::return_type read(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
@@ -64,6 +67,12 @@ public:
   static constexpr double MAX_RAD_POSITION = 1.3;
 
 private:
+  // Converts between hall sensor value and radians for a given finger
+  double hallToRad(int finger_id, int16_t hall_value);
+  int16_t radToHall(int finger_id, double rad_value);
+
+  void stateCallbackFunc(const DexRobot::Dex021::DX21StatusRxData * status);
+
   // Hardware handle
   std::shared_ptr<DexRobot::Dex021::DexHand_021S> hand_;
   uint8_t device_id_ = 0x01;
