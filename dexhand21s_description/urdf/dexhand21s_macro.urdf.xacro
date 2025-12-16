@@ -87,7 +87,7 @@
       </collision>
     </link>
 
-    <joint name="joint_f_1_3" type="revolute">
+    <joint name="joint_f_1_3" type="fixed">
       <origin xyz="0.0566267969313633 0 0" rpy="0 0 0" />
       <parent link="link_f_1_2" />
       <child link="link_f_1_3" />
@@ -124,7 +124,7 @@
       </collision>
     </link>
 
-    <joint name="joint_f_3_1" type="revolute">
+    <joint name="joint_f_3_1" type="fixed">
       <origin xyz="0.0229304804089818 -0.025131187879906 0.122110541735432" rpy="-3.14159265358978 0 0" />
       <parent link="base_link" />
       <child link="link_f_3_1" />
@@ -198,7 +198,7 @@
       </collision>
     </link>
 
-    <joint name="joint_f_3_3" type="revolute">
+    <joint name="joint_f_3_3" type="fixed">
       <origin xyz="0.0530000001597184 0 0" rpy="0 0 0" />
       <parent link="link_f_3_2" />
       <child link="link_f_3_3" />
@@ -235,7 +235,7 @@
       </collision>
     </link>
 
-    <joint name="joint_f_2_1" type="revolute">
+    <joint name="joint_f_2_1" type="fixed">
       <origin xyz="0.02293 0.024869 0.12211" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="link_f_2_1" />
@@ -309,7 +309,7 @@
       </collision>
     </link>
 
-    <joint name="joint_f_2_3" type="revolute">
+    <joint name="joint_f_2_3" type="fixed">
       <origin xyz="0.053 0 0" rpy="0 0 0" />
       <parent link="link_f_2_2" />
       <child link="link_f_2_3" />

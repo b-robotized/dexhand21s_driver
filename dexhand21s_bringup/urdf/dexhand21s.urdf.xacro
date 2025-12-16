@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dexhand21s">
 
+  <xacro:arg name="prefix" default=""/>
+  <xacro:arg name="use_mock_hardware" default="false"/>
+
   <xacro:include filename="$(find dexhand21s_description)/urdf/dexhand21s_macro.urdf.xacro"/>
   <xacro:include filename="$(find dexhand21s_bringup)/urdf/dexhand21s.ros2_control.xacro"/>
 
   <xacro:dexhand21s name="DexHand21S"/>
 
   <!-- Add ros2_control hardware -->
-  <xacro:dexhand21s_ros2_control name="DexHand21S_control"/>
+  <xacro:dexhand21s_ros2_control
+    name="DexHand21S_control"
+    prefix="$(arg prefix)"
+    use_mock_hardware="$(arg use_mock_hardware)"/>
 </robot>

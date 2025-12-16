@@ -1,14 +1,18 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="dexhand21s_ros2_control" params="name">
-
+  <xacro:macro name="dexhand21s_ros2_control" params="name prefix use_mock_hardware:=false">
     <ros2_control name="${name}" type="system">
       <hardware>
-        <plugin>dexhand21s_hardware_interface/DexHand21sHardwareInterface</plugin>
-        <param name="device_id">1</param>
-        <param name="angular_velocity">10</param>
-        <param name="sampling_rate">50</param>
+        <xacro:if value="$(arg use_mock_hardware)">
+          <plugin>mock_components/GenericSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="$(arg use_mock_hardware)">
+          <plugin>dexhand21s_hardware_interface/DexHand21sHardwareInterface</plugin>
+          <param name="device_id">1</param>
+          <param name="angular_velocity">10</param>
+          <param name="sampling_rate">50</param>
+        </xacro:unless>
       </hardware>
 
       <joint name="joint_f_1_2">
