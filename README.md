@@ -5,6 +5,12 @@ ros2 control hardware interface for DexRobot 21s hand.
 Pluginlib-Library: dexhand21s_hardware_interface
 Plugin: dexhand21s_hardware_interface/DexHand21sHardwareInterface (hardware_interface::SystemInterface)
 
+## Testing
+
+- view robot and rqt: `ros2 launch dexhand21s_description view_dexhand21s.launch.xml`
+- bringup dexhand hardware with real hand: ``
+- bringup dexhand with mockhw: upcoming!
+
 ## Position limits for active joints
 
 - Finger 1: from -1.33rad (= 0 hall = extended) to 0.0 (= 1000 hall = closed)
