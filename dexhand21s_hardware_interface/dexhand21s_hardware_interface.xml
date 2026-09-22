@@ -1,0 +1,9 @@
+<library path="dexhand21s_hardware_interface">
+  <class name="dexhand21s_hardware_interface/DexHand21sHardwareInterface"
+         type="dexhand21s_hardware_interface::DexHand21sHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      DexHand 021s ros2_control hardware interface.
+    </description>
+  </class>
+</library>

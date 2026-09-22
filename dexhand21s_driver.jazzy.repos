@@ -1,0 +1,5 @@
+repositories:
+  dexhand21s_vendor:
+    type: git
+    url: git@github.com:b-robotized/dexhand21s_vendor.git
+    version: master

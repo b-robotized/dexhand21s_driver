@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dexhand21s">
+
+  <xacro:include filename="$(find dexhand21s_bringup)/urdf/dexhand.ros2_control.xacro"/>
+
+  <!-- Base link -->
+  <link name="base_link"/>
+
+  <link name="finger1"/>
+  <joint name="joint1" type="revolute">
+    <origin xyz="-0.03270 -0.00017 0.11840" rpy="1.5708 -0.9115 3.1416"/>
+    <parent link="base_link"/>
+    <child link="finger1"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1200" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="finger2"/>
+  <joint name="joint2" type="revolute">
+    <origin xyz="-0.03270 -0.00017 0.11840" rpy="1.5708 -0.9115 3.1416"/>
+    <parent link="base_link"/>
+    <child link="finger2"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1200" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="finger3"/>
+  <joint name="joint3" type="revolute">
+    <origin xyz="-0.03270 -0.00017 0.11840" rpy="1.5708 -0.9115 3.1416"/>
+    <parent link="base_link"/>
+    <child link="finger3"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1200" effort="10" velocity="1.0"/>
+  </joint>
+
+  <!-- Finger 1 
+  <link name="link_f_1_2"/>
+  <joint name="joint_f_1_2" type="revolute">
+    <origin xyz="-0.03270 -0.00017 0.11840" rpy="1.5708 -0.9115 3.1416"/>
+    <parent link="base_link"/>
+    <child link="link_f_1_2"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="link_f_1_3"/>
+  <joint name="joint_f_1_3" type="revolute">
+    <origin xyz="0.05663 0 0" rpy="0 0 0"/>
+    <parent link="link_f_1_2"/>
+    <child link="link_f_1_3"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>-->
+
+  <!-- Finger 2 
+  <link name="link_f_2_1"/>
+  <joint name="joint_f_2_1" type="revolute">
+    <origin xyz="0.02293 0.02487 0.12211" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="link_f_2_1"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="link_f_2_2"/>
+  <joint name="joint_f_2_2" type="revolute">
+    <origin xyz="0.00893 0 0" rpy="1.5708 -0.88601 0"/>
+    <parent link="link_f_2_1"/>
+    <child link="link_f_2_2"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="link_f_2_3"/>
+  <joint name="joint_f_2_3" type="revolute">
+    <origin xyz="0.053 0 0" rpy="0 0 0"/>
+    <parent link="link_f_2_2"/>
+    <child link="link_f_2_3"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>-->
+
+  <!-- Finger 3 
+  <link name="link_f_3_1"/>
+  <joint name="joint_f_3_1" type="revolute">
+    <origin xyz="0.02293 -0.02513 0.12211" rpy="-3.1416 0 0"/>
+    <parent link="base_link"/>
+    <child link="link_f_3_1"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="link_f_3_2"/>
+  <joint name="joint_f_3_2" type="revolute">
+    <origin xyz="0.00893 0 0" rpy="-1.5708 0.88601 0"/>
+    <parent link="link_f_3_1"/>
+    <child link="link_f_3_2"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="link_f_3_3"/>
+  <joint name="joint_f_3_3" type="revolute">
+    <origin xyz="0.053 0 0" rpy="0 0 0"/>
+    <parent link="link_f_3_2"/>
+    <child link="link_f_3_3"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0" upper="1.57" effort="10" velocity="1.0"/>
+  </joint>-->
+
+  <!-- Add ros2_control hardware -->
+  <xacro:dexhand_ros2_control name="DexHand21S"/>
+
+</robot>
