@@ -40,6 +40,13 @@ Set in the `<hardware>` block of the ros2_control xacro:
 - `finger_speed_deg_s` (default 10): motor speed used for every position command, in degrees per second. 75 degrees is the full range of a finger.
 - `sampling_rate` (default 50): rate in Hz at which the hand streams its status over CANFD.
 
+## State interfaces
+
+Per active joint the interface exports:
+
+- `position`: radians, converted from the hall sensor (see below).
+- `velocity`, `temperature`, `current`: raw integer values from the SDK status frame, cast to double. The SDK does not document their units, so treat them as relative readings until verified against the manual. In particular `velocity` is **not** rad/s.
+
 ## Position limits for active joints
 
 - Finger 1: from -1.33rad (= 0 hall = extended) to 0.0 (= 1000 hall = closed)

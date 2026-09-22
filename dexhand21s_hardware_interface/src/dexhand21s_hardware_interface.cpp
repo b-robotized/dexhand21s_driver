@@ -77,6 +77,7 @@ int16_t DexHand21sHardwareInterface::radToHall(int finger_id, double rad_value)
 void DexHand21sHardwareInterface::stateCallbackFunc(
   const DexRobot::Dex021::DX21StatusRxData * status)
 {
+  // Velocity, temperature and current are raw SDK values; units are undocumented (see README).
   joint_position_states_ = {
     {hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
      hallToRad(3, status->MotorHallValue(3))}};
