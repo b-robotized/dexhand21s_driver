@@ -98,18 +98,18 @@ void DexHand21sHardwareInterface::stateCallbackFunc(
   const DexRobot::Dex021::DX21StatusRxData * status)
 {
   joint_position_states_ = {
-    hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
-    hallToRad(3, status->MotorHallValue(3))};
+    {hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
+     hallToRad(3, status->MotorHallValue(3))}};
   joint_velocity_states_ = {
-    static_cast<double>(status->MotorVelocity(1)), static_cast<double>(status->MotorVelocity(2)),
-    static_cast<double>(status->MotorVelocity(3))};
+    {static_cast<double>(status->MotorVelocity(1)), static_cast<double>(status->MotorVelocity(2)),
+     static_cast<double>(status->MotorVelocity(3))}};
   joint_temperature_states_ = {
-    static_cast<double>(status->MotorTemperature(1)),
-    static_cast<double>(status->MotorTemperature(2)),
-    static_cast<double>(status->MotorTemperature(3))};
+    {static_cast<double>(status->MotorTemperature(1)),
+     static_cast<double>(status->MotorTemperature(2)),
+     static_cast<double>(status->MotorTemperature(3))}};
   joint_current_states_ = {
-    static_cast<double>(status->MotorCurrent(1)), static_cast<double>(status->MotorCurrent(2)),
-    static_cast<double>(status->MotorCurrent(3))};
+    {static_cast<double>(status->MotorCurrent(1)), static_cast<double>(status->MotorCurrent(2)),
+     static_cast<double>(status->MotorCurrent(3))}};
 }
 
 hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(

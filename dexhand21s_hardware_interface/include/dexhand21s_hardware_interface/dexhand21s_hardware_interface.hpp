@@ -84,10 +84,10 @@ private:
   std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_temperature_itfs_;
   std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_current_itfs_;
 
-  std::array<double, DEXHAND21S_JOINT_COUNT> joint_position_states_{0.0, 0.0, 0.0};
-  std::array<double, DEXHAND21S_JOINT_COUNT> joint_velocity_states_{0.0, 0.0, 0.0};
-  std::array<double, DEXHAND21S_JOINT_COUNT> joint_temperature_states_{0.0, 0.0, 0.0};
-  std::array<double, DEXHAND21S_JOINT_COUNT> joint_current_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_position_states_{{0.0, 0.0, 0.0}};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_velocity_states_{{0.0, 0.0, 0.0}};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_temperature_states_{{0.0, 0.0, 0.0}};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_current_states_{{0.0, 0.0, 0.0}};
 };
 
 }  // namespace dexhand21s_hardware_interface
