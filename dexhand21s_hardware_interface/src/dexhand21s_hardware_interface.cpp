@@ -17,6 +17,9 @@
 
 #include "dexhand21s_hardware_interface/dexhand21s_hardware_interface.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -56,42 +59,19 @@ double DexHand21sHardwareInterface::hallToRad(int finger_id, int16_t hall_value)
 
 int16_t DexHand21sHardwareInterface::radToHall(int finger_id, double rad_value)
 {
-  // if finger 1, then 0 - 1000 is 0.0 to -1.3 (clipped)
-  // else, then 0 - 1000 is 0.0 to 1.3 (clipped)
-
-  if (rad_value < (-1 * MAX_RAD_POSITION))
+  // Finger 1 closes towards negative angles, fingers 2 and 3 towards positive ones.
+  const double lo = finger_id == 1 ? -MAX_RAD_POSITION : MIN_RAD_POSITION;
+  const double hi = finger_id == 1 ? MIN_RAD_POSITION : MAX_RAD_POSITION;
+  const double clipped = std::clamp(rad_value, lo, hi);
+  if (clipped != rad_value)
   {
-    rad_value = -1 * MAX_RAD_POSITION;
+    RCLCPP_WARN_THROTTLE(
+      get_logger(), *get_clock(), 1000,
+      "Finger %d command %.3f rad is outside [%.2f, %.2f] rad, clipping.", finger_id, rad_value, lo,
+      hi);
   }
-  else if (rad_value > MAX_RAD_POSITION)
-  {
-    rad_value = MAX_RAD_POSITION;
-  }
-
-  if (finger_id == 1)
-  {
-    if (rad_value > MIN_RAD_POSITION)
-    {
-      rad_value = MIN_RAD_POSITION;
-    }
-
-    // scale (0.0 to -1.3) to (0 - 1000)
-    int16_t hall = static_cast<int16_t>((rad_value / (-1 * MAX_RAD_POSITION)) * 1000.0);
-    return hall;
-  }
-  else
-  {
-    if (rad_value < MIN_RAD_POSITION)
-    {
-      rad_value = MIN_RAD_POSITION;
-    }
-
-    // scale (0.0 to 1.3) to (0 - 1000)
-    int16_t hall = static_cast<int16_t>((rad_value / MAX_RAD_POSITION) * 1000.0);
-    return hall;
-  }
-
-  return 0.0;
+  return static_cast<int16_t>(
+    std::lround(std::abs(clipped) / MAX_RAD_POSITION * MAX_HALL_POSITION));
 }
 
 void DexHand21sHardwareInterface::stateCallbackFunc(
@@ -345,8 +325,13 @@ hardware_interface::return_type DexHand21sHardwareInterface::write(
 {
   for (uint8_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
+    const double cmd = get_command(joint_position_itfs_[i]);
+    if (!std::isfinite(cmd))
+    {
+      continue;
+    }
     uint8_t finger_id = i + 1;
-    int16_t hall_val = radToHall(finger_id, get_command(joint_position_itfs_[i]));
+    int16_t hall_val = radToHall(finger_id, cmd);
     hand_->moveFinger(
       device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val, angular_velocity_ * 100,
       DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
