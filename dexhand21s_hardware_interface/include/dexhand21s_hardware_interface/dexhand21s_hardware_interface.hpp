@@ -84,6 +84,10 @@ private:
 
   // Steady-clock time of the last status frame from the hand, written by the SDK thread.
   std::atomic<int64_t> last_status_ns_{0};
+
+  // Consecutive write() cycles in which the SDK refused to send a command.
+  unsigned int failed_writes_ = 0;
+  static constexpr unsigned int MAX_FAILED_WRITES = 5;
   static int64_t now_ns()
   {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(

@@ -301,6 +301,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_activate(
     set_command(joint_position_itfs_[i], joint_position_states_[i]);
   }
 
+  failed_writes_ = 0;
   RCLCPP_INFO(get_logger(), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -357,6 +358,7 @@ hardware_interface::return_type DexHand21sHardwareInterface::read(
 hardware_interface::return_type DexHand21sHardwareInterface::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  bool all_sent = true;
   for (uint8_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
     const double cmd = get_command(joint_position_itfs_[i]);
@@ -366,11 +368,22 @@ hardware_interface::return_type DexHand21sHardwareInterface::write(
     }
     uint8_t finger_id = i + 1;
     int16_t hall_val = radToHall(finger_id, cmd);
-    hand_->moveFinger(
-      device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val,
-      static_cast<int16_t>(finger_speed_deg_s_ * 100), DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
+    if (!hand_->moveFinger(
+          device_id_, finger_id, 0x03, hall_val, static_cast<int16_t>(finger_speed_deg_s_ * 100),
+          DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10))
+    {
+      all_sent = false;
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 1000, "Failed to send command to finger %d.", finger_id);
+    }
   }
 
+  failed_writes_ = all_sent ? 0 : failed_writes_ + 1;
+  if (failed_writes_ >= MAX_FAILED_WRITES)
+  {
+    RCLCPP_ERROR(get_logger(), "%u consecutive write cycles failed.", failed_writes_);
+    return hardware_interface::return_type::ERROR;
+  }
   return hardware_interface::return_type::OK;
 }
 
