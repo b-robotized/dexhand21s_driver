@@ -32,6 +32,14 @@ The ZLG USB-CANFD adapter needs a udev rule or root to be accessible.
 
 Both bringup variants start the `joint_trajectory_controller` (active) and the `forward_position_controller` (inactive), plus RViz and rqt_joint_trajectory_controller. Test publishers for either controller are in `dexhand21s_bringup/launch/test_*.launch.xml`.
 
+## Hardware parameters
+
+Set in the `<hardware>` block of the ros2_control xacro:
+
+- `device_id` (default 1): hand ID assigned to the connected hand on configure.
+- `finger_speed_deg_s` (default 10): motor speed used for every position command, in degrees per second. 75 degrees is the full range of a finger.
+- `sampling_rate` (default 50): rate in Hz at which the hand streams its status over CANFD.
+
 ## Position limits for active joints
 
 - Finger 1: from -1.33rad (= 0 hall = extended) to 0.0 (= 1000 hall = closed)

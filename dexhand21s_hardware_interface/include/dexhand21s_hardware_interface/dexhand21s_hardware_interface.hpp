@@ -76,7 +76,7 @@ private:
   // Hardware handle
   std::shared_ptr<DexRobot::Dex021::DexHand_021S> hand_;
   uint8_t device_id_ = 0x01;
-  int16_t angular_velocity_ = 10;
+  int16_t finger_speed_deg_s_ = 10;  // SDK takes degrees per second (times 100)
   uint16_t sampling_rate_ = 50;
 
   std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_position_itfs_;

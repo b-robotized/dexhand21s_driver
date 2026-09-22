@@ -111,10 +111,10 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
     device_id_ = static_cast<uint8_t>(std::stoi(hw_params.at("device_id")));
   }
 
-  // default angular_velocity_ = 10 rad/s
-  if (hw_params.find("angular_velocity") != hw_params.end())
+  // default finger_speed_deg_s_ = 10 deg/s
+  if (hw_params.find("finger_speed_deg_s") != hw_params.end())
   {
-    angular_velocity_ = static_cast<int16_t>(std::stoi(hw_params.at("angular_velocity")));
+    finger_speed_deg_s_ = static_cast<int16_t>(std::stoi(hw_params.at("finger_speed_deg_s")));
   }
 
   // default sampling_rate_ = 50 Hz
@@ -349,8 +349,8 @@ hardware_interface::return_type DexHand21sHardwareInterface::write(
     uint8_t finger_id = i + 1;
     int16_t hall_val = radToHall(finger_id, cmd);
     hand_->moveFinger(
-      device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val, angular_velocity_ * 100,
-      DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
+      device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val,
+      static_cast<int16_t>(finger_speed_deg_s_ * 100), DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
   }
 
   return hardware_interface::return_type::OK;
