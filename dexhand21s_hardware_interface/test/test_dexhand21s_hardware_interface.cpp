@@ -17,41 +17,72 @@
 #include <string>
 
 #include "hardware_interface/resource_manager.hpp"
-#include "ros2_control_test_assets/components_urdfs.hpp"
+#include "hardware_interface/system_interface.hpp"
+#include "pluginlib/class_loader.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "ros2_control_test_assets/descriptions.hpp"
 
-class TestDexHand21sHardwareInterface : public ::testing::Test
+namespace
 {
-protected:
-  void SetUp() override
+const char kPlugin[] = "dexhand21s_hardware_interface/DexHand21sHardwareInterface";
+
+std::string joint(const std::string & name, int finger_id, bool all_states = true)
+{
+  std::string s = "<joint name=\"" + name + "\">\n<param name=\"finger_id\">" +
+                  std::to_string(finger_id) +
+                  "</param>\n<command_interface name=\"position\"/>\n"
+                  "<state_interface name=\"position\"/>\n";
+  if (all_states)
   {
-    // TODO(anyone): Extend this description to your robot
-    dexhand21s_hardware_interface_2dof_ =
-      R"(
-        <ros2_control name="DexHand21sHardwareInterface2dof" type="system">
-          <hardware>
-            <plugin>dexhand21s_hardware_interface/DexHand21sHardwareInterface</plugin>
-          </hardware>
-          <joint name="joint1">
-            <command_interface name="position"/>
-            <state_interface name="position"/>
-            <param name="initial_position">1.57</param>
-          </joint>
-          <joint name="joint2">
-            <command_interface name="position"/>
-            <state_interface name="position"/>
-            <param name="initial_position">0.7854</param>
-          </joint>
-        </ros2_control>
-    )";
+    s +=
+      "<state_interface name=\"velocity\"/>\n<state_interface name=\"temperature\"/>\n"
+      "<state_interface name=\"current\"/>\n";
   }
+  return s + "</joint>\n";
+}
 
-  std::string dexhand21s_hardware_2dof_;
-};
-
-TEST_F(TestDexHand21sHardwareInterface, load_dexhand21s_hardware_2dof)
+std::string description(const std::string & joints)
 {
-  auto urdf = ros2_control_test_assets::urdf_head + dexhand21s_hardware_2dof_ +
-              ros2_control_test_assets::urdf_tail;
-  ASSERT_NO_THROW(hardware_interface::ResourceManager rm(urdf));
+  return std::string(ros2_control_test_assets::urdf_head) +
+         "<ros2_control name=\"DexHand21s\" type=\"system\"><hardware><plugin>" + kPlugin +
+         "</plugin></hardware>\n" + joints + "</ros2_control>" +
+         ros2_control_test_assets::urdf_tail;
+}
+
+hardware_interface::ResourceManager make_rm()
+{
+  return hardware_interface::ResourceManager(
+    std::make_shared<rclcpp::Clock>(), rclcpp::get_logger("test_dexhand21s"));
+}
+}  // namespace
+
+// Loads the shared library and resolves the vendor SDK libraries.
+TEST(TestDexHand21sHardwareInterface, plugin_loads)
+{
+  pluginlib::ClassLoader<hardware_interface::SystemInterface> loader(
+    "hardware_interface", "hardware_interface::SystemInterface");
+  ASSERT_NO_THROW(loader.createUnmanagedInstance(kPlugin));
+}
+
+// on_init must reject descriptions that don't match the hand, before touching the SDK.
+TEST(TestDexHand21sHardwareInterface, rejects_wrong_joint_count)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(
+    rm.load_and_initialize_components(description(joint("joint1", 1) + joint("joint2", 2))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_missing_state_interfaces)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 3, false))));
+}
+
+// Valid description without the CANFD adapter plugged in: init must fail cleanly, not crash.
+TEST(TestDexHand21sHardwareInterface, valid_description_without_hardware)
+{
+  auto rm = make_rm();
+  EXPECT_NO_THROW(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 3))));
 }
