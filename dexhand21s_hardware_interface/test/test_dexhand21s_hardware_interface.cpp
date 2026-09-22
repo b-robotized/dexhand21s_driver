@@ -30,10 +30,14 @@ const char kPlugin[] = "dexhand21s_hardware_interface/DexHand21sHardwareInterfac
 
 std::string joint(const std::string & name, int finger_id, bool all_states = true)
 {
-  std::string s = "<joint name=\"" + name + "\">\n<param name=\"finger_id\">" +
-                  std::to_string(finger_id) +
-                  "</param>\n<command_interface name=\"position\"/>\n"
-                  "<state_interface name=\"position\"/>\n";
+  std::string s = "<joint name=\"" + name + "\">\n";
+  if (finger_id > 0)
+  {
+    s += "<param name=\"finger_id\">" + std::to_string(finger_id) + "</param>\n";
+  }
+  s +=
+    "<command_interface name=\"position\"/>\n"
+    "<state_interface name=\"position\"/>\n";
   if (all_states)
   {
     s +=
@@ -79,6 +83,27 @@ TEST(TestDexHand21sHardwareInterface, rejects_missing_state_interfaces)
   auto rm = make_rm();
   EXPECT_FALSE(rm.load_and_initialize_components(
     description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 3, false))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_missing_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 0))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_duplicate_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 2))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_out_of_range_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 4))));
 }
 
 // Valid description without the CANFD adapter plugged in: init succeeds (no hardware access),

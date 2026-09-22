@@ -192,12 +192,25 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
       return hardware_interface::CallbackReturn::ERROR;
     }
 
-    uint8_t finger_id =
-      static_cast<uint8_t>(std::stoi(joint.parameters.at("finger_id"), nullptr, 0));
-    if (finger_id < 1 || finger_id > DEXHAND21S_JOINT_COUNT)
+    const auto finger_id_it = joint.parameters.find("finger_id");
+    if (finger_id_it == joint.parameters.end())
     {
       RCLCPP_FATAL(
-        get_logger(), "Joint '%s' has invalid finger_id: %d. Expected values 1, 2, and 3.",
+        get_logger(), "Joint '%s' is missing the 'finger_id' parameter.", joint.name.c_str());
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    const int finger_id = std::atoi(finger_id_it->second.c_str());
+    if (finger_id < 1 || finger_id > static_cast<int>(DEXHAND21S_JOINT_COUNT))
+    {
+      RCLCPP_FATAL(
+        get_logger(), "Joint '%s' has invalid finger_id '%s'. Expected 1, 2 or 3.",
+        joint.name.c_str(), finger_id_it->second.c_str());
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    if (!joint_position_itfs_[finger_id - 1].empty())
+    {
+      RCLCPP_FATAL(
+        get_logger(), "Joint '%s' has finger_id %d, which is already used by another joint.",
         joint.name.c_str(), finger_id);
       return hardware_interface::CallbackReturn::ERROR;
     }
