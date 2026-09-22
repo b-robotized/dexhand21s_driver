@@ -210,22 +210,23 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
     RCLCPP_INFO(get_logger(), "Joint '%s' -> finger_id: %d", joint.name.c_str(), finger_id);
   }
 
-  const auto device_ = DexRobot::Dex021::DexHand::createInstance(
-    DexRobot::Dex021::ProductType::DX021_S, DexRobot::Dex021::AdapterType::ZLG_MINI, 0);
-  hand_ = std::dynamic_pointer_cast<DexRobot::Dex021::DexHand_021S>(device_);
-
-  if (!hand_)
-  {
-    RCLCPP_FATAL(get_logger(), "Failed to create DexHand instance.");
-    return hardware_interface::CallbackReturn::ERROR;
-  }
-
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
+  // Probes the USB adapter, so it belongs here and not in on_init.
+  hand_ = std::dynamic_pointer_cast<DexRobot::Dex021::DexHand_021S>(
+    DexRobot::Dex021::DexHand::createInstance(
+      DexRobot::Dex021::ProductType::DX021_S, DexRobot::Dex021::AdapterType::ZLG_MINI, 0));
+  if (!hand_)
+  {
+    RCLCPP_FATAL(
+      get_logger(), "Failed to create DexHand instance. Is the CANFD adapter connected?");
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
   DexRobot::Dex021::DH21StatusRxCallBack callback =
     std::bind(&DexHand21sHardwareInterface::stateCallbackFunc, this, std::placeholders::_1);
   hand_->setStatusRxCallback(callback);
@@ -297,7 +298,9 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_cleanup(
 {
   hand_->clearFirmwareError(device_id_, 0x00);
 
-  if (!hand_->disconnect())
+  const bool disconnected = hand_->disconnect();
+  hand_.reset();
+  if (!disconnected)
   {
     RCLCPP_ERROR(get_logger(), "Failed to disconnect from Dex Hand.");
     return hardware_interface::CallbackReturn::ERROR;
