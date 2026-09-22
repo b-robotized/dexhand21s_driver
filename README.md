@@ -22,11 +22,15 @@ colcon build --symlink-install
 
 The ZLG USB-CANFD adapter needs a udev rule or root to be accessible.
 
-## Testing
+## Usage
 
-- view robot and rqt: `ros2 launch dexhand21s_description view_dexhand21s.launch.xml`
-- bringup dexhand hardware with real hand: ``
-- bringup dexhand with mockhw: upcoming!
+- View the robot with joint sliders: `ros2 launch dexhand21s_description view_dexhand21s.launch.xml`
+- Bring up the real hand (ZLG USB-CANFD mini adapter plugged in, hand ID 1):
+  `ros2 launch dexhand21s_bringup dexhand21s.launch.xml`
+- Bring up with mock hardware, no adapter needed:
+  `ros2 launch dexhand21s_bringup dexhand21s.launch.xml use_mock_hardware:=true`
+
+Both bringup variants start the `joint_trajectory_controller` (active) and the `forward_position_controller` (inactive), plus RViz and rqt_joint_trajectory_controller. Test publishers for either controller are in `dexhand21s_bringup/launch/test_*.launch.xml`.
 
 ## Position limits for active joints
 
