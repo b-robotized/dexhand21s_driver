@@ -1,17 +1,19 @@
-// Copyright (c) 2025 b»robotized
-// All rights reserved.
+// Copyright (c) 2025, b-robotized Group
 //
-// Proprietary License
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// Unauthorized copying of this file, via any medium is strictly prohibited.
-// The file is considered confidential
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-// Adapted for <Insert_Company_Name> that received unlimited, worldwide
-// use and change right, except distributing this library separately
-// of their product.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-#ifndef dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
-#define dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#ifndef DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#define DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
 
 #include <cstring>
 #include <iostream>
@@ -49,20 +51,45 @@ public:
   hardware_interface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
+  hardware_interface::CallbackReturn on_cleanup(
+    const rclcpp_lifecycle::State & previous_state) override;
+
   hardware_interface::return_type read(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
   hardware_interface::return_type write(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+  static constexpr size_t DEXHAND21S_JOINT_COUNT = 3;
+  static constexpr int16_t MIN_HALL_POSITION = 0;
+  static constexpr int16_t MAX_HALL_POSITION = 1000;
+  static constexpr double MIN_RAD_POSITION = 0.0;
+  static constexpr double MAX_RAD_POSITION = 1.3;
+
 private:
+  // Converts between hall sensor value and radians for a given finger
+  double hallToRad(int finger_id, int16_t hall_value);
+  int16_t radToHall(int finger_id, double rad_value);
+
+  void stateCallbackFunc(const DexRobot::Dex021::DX21StatusRxData * status);
+
   // Hardware handle
   std::shared_ptr<DexRobot::Dex021::DexHand_021S> hand_;
-  uint8_t device_id_;
+  uint8_t device_id_ = 0x01;
+  int16_t angular_velocity_ = 10;
+  uint16_t sampling_rate_ = 50;
 
-  std::map<std::string, uint8_t> joint_finger_ids_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_position_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_velocity_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_temperature_itfs_;
+  std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_current_itfs_;
+
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_position_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_velocity_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_temperature_states_{0.0, 0.0, 0.0};
+  std::array<double, DEXHAND21S_JOINT_COUNT> joint_current_states_{0.0, 0.0, 0.0};
 };
 
 }  // namespace dexhand21s_hardware_interface
 
-#endif  // dexhand21s_hardware_interface__DEXHAND21S_HARDWARE_INTERFACE_HPP_
+#endif  // DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_

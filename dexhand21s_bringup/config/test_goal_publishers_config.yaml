@@ -1,4 +1,4 @@
-# Copyright (c) 20224 Stogl Robotics Consulting UG (haftungsbeschränkt)
+# Copyright (c) 2025, b-robotized Group
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#
-# Source of this file are templates in
-# [RosTeamWorkspace](https://github.com/StoglRobotics/ros_team_workspace) repository.
 #
 
 publisher_forward_position_controller:
@@ -24,9 +20,9 @@ publisher_forward_position_controller:
     wait_sec_between_publish: 5
 
     goal_names: ["pos1", "pos2", "pos3"]
-    pos1: [0.0, 0.0, 0.0]
-    pos2: [0.0, 1200.0, 0.0]
-    pos3: [0.0, 0.0, 0.0]
+    pos1: [-1.33, 0.0, 0.0]
+    pos2: [-1.33, 1.33, 0.0]
+    pos3: [-1.33, 0.0, 0.0]
 
 
 publisher_joint_trajectory_controller:
@@ -39,13 +35,12 @@ publisher_joint_trajectory_controller:
     goal_time_from_start: 3.0
     goal_names: ["pos1", "pos2", "pos3"]
     pos1:
-      positions: [0.0, 0.0, 0.0]
+      positions: [-1.33, 0.0, 0.0]
     pos2:
-      positions: [0.0, 1200.0, 0.0]
+      positions: [-1.33, 1.33, 0.0]
     pos3:
-      positions: [0.0, 0.0, 0.0]
-
+      positions: [-1.33, 0.0, 0.0]
     joints:
-      - joint1
-      - joint2
-      - joint3
+      - joint_f_1_2
+      - joint_f_2_2
+      - joint_f_3_2

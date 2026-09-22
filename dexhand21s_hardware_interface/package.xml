@@ -5,10 +5,8 @@
   <version>0.0.0</version>
   <description>ros2 control hardware interface for DexRobot 21s hand.</description>
 
+  <maintainer email="yara.shahin@b-robotized.com">Yara Shahin</maintainer>
   <maintainer email="denis.stogl@b-robotized.com">Dr.-Ing. Denis Štogl</maintainer>
-  <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
-  <maintainer email="christoph.froehlich@ait.ac.at">Christoph Froehlich</maintainer>
-  <maintainer email="sai.kishor@pal-robotics.com">Sai Kishor Kothakota</maintainer>
 
   <license>Apache-2.0</license>
 
@@ -19,9 +17,11 @@
 
   <depend>backward_ros</depend>
   <depend>hardware_interface</depend>
+  <depend>libserial-dev</depend>
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
+  <depend>dexhand_vendor</depend>
 
   <exec_depend>controller_manager</exec_depend>
 
