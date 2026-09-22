@@ -39,6 +39,7 @@ Set in the `<hardware>` block of the ros2_control xacro:
 - `device_id` (default 1): hand ID assigned to the connected hand on configure.
 - `finger_speed_deg_s` (default 10): motor speed used for every position command, in degrees per second. 75 degrees is the full range of a finger.
 - `sampling_rate` (default 50): rate in Hz at which the hand streams its status over CANFD.
+- `status_timeout` (default 0.5): seconds without a status frame after which `read()` returns an error and the component goes into the error state.
 
 ## State interfaces
 

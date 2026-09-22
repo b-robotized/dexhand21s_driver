@@ -78,6 +78,7 @@ void DexHand21sHardwareInterface::stateCallbackFunc(
   const DexRobot::Dex021::DX21StatusRxData * status)
 {
   // Velocity, temperature and current are raw SDK values; units are undocumented (see README).
+  last_status_ns_ = now_ns();
   joint_position_states_ = {
     {hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
      hallToRad(3, status->MotorHallValue(3))}};
@@ -122,6 +123,12 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
   if (hw_params.find("sampling_rate") != hw_params.end())
   {
     sampling_rate_ = static_cast<uint16_t>(std::stoi(hw_params.at("sampling_rate")));
+  }
+
+  // default status_timeout_s_ = 0.5 s without a status frame before read() reports an error
+  if (hw_params.find("status_timeout") != hw_params.end())
+  {
+    status_timeout_s_ = std::stod(hw_params.at("status_timeout"));
   }
 
   if (info_.joints.size() != DEXHAND21S_JOINT_COUNT)
@@ -266,6 +273,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   auto firmwareVersion = hand_->getFirmwareVersion(device_id_, 0x00);
   RCLCPP_INFO(get_logger(), "Firmware version = %d", firmwareVersion);
 
+  last_status_ns_ = now_ns();
   RCLCPP_INFO(get_logger(), "Successfully connected and configured!");
 
   return CallbackReturn::SUCCESS;
@@ -327,6 +335,15 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_cleanup(
 hardware_interface::return_type DexHand21sHardwareInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  const double since_status_s = static_cast<double>(now_ns() - last_status_ns_) * 1e-9;
+  if (since_status_s > status_timeout_s_)
+  {
+    RCLCPP_ERROR_THROTTLE(
+      get_logger(), *get_clock(), 1000, "No status from the hand for %.2f s (timeout %.2f s).",
+      since_status_s, status_timeout_s_);
+    return hardware_interface::return_type::ERROR;
+  }
+
   for (size_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
     set_state(joint_position_itfs_[i], joint_position_states_[i]);

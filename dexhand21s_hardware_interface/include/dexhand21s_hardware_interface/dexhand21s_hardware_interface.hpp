@@ -15,6 +15,8 @@
 #ifndef DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
 #define DEXHAND21S_HARDWARE_INTERFACE__DEXHAND21S_HARDWARE_INTERFACE_HPP_
 
+#include <atomic>
+#include <chrono>
 #include <cstring>
 #include <iostream>
 #include <limits>
@@ -78,6 +80,16 @@ private:
   uint8_t device_id_ = 0x01;
   int16_t finger_speed_deg_s_ = 10;  // SDK takes degrees per second (times 100)
   uint16_t sampling_rate_ = 50;
+  double status_timeout_s_ = 0.5;
+
+  // Steady-clock time of the last status frame from the hand, written by the SDK thread.
+  std::atomic<int64_t> last_status_ns_{0};
+  static int64_t now_ns()
+  {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+             std::chrono::steady_clock::now().time_since_epoch())
+      .count();
+  }
 
   std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_position_itfs_;
   std::array<std::string, DEXHAND21S_JOINT_COUNT> joint_velocity_itfs_;
