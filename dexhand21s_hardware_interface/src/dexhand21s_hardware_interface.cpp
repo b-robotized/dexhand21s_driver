@@ -77,6 +77,8 @@ int16_t DexHand21sHardwareInterface::radToHall(int finger_id, double rad_value)
 void DexHand21sHardwareInterface::stateCallbackFunc(
   const DexRobot::Dex021::DX21StatusRxData * status)
 {
+  // Velocity, temperature and current are raw SDK values; units are undocumented (see README).
+  last_status_ns_ = now_ns();
   joint_position_states_ = {
     {hallToRad(1, status->MotorHallValue(1)), hallToRad(2, status->MotorHallValue(2)),
      hallToRad(3, status->MotorHallValue(3))}};
@@ -111,16 +113,22 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
     device_id_ = static_cast<uint8_t>(std::stoi(hw_params.at("device_id")));
   }
 
-  // default angular_velocity_ = 10 rad/s
-  if (hw_params.find("angular_velocity") != hw_params.end())
+  // default finger_speed_deg_s_ = 10 deg/s
+  if (hw_params.find("finger_speed_deg_s") != hw_params.end())
   {
-    angular_velocity_ = static_cast<int16_t>(std::stoi(hw_params.at("angular_velocity")));
+    finger_speed_deg_s_ = static_cast<int16_t>(std::stoi(hw_params.at("finger_speed_deg_s")));
   }
 
   // default sampling_rate_ = 50 Hz
   if (hw_params.find("sampling_rate") != hw_params.end())
   {
     sampling_rate_ = static_cast<uint16_t>(std::stoi(hw_params.at("sampling_rate")));
+  }
+
+  // default status_timeout_s_ = 0.5 s without a status frame before read() reports an error
+  if (hw_params.find("status_timeout") != hw_params.end())
+  {
+    status_timeout_s_ = std::stod(hw_params.at("status_timeout"));
   }
 
   if (info_.joints.size() != DEXHAND21S_JOINT_COUNT)
@@ -192,12 +200,25 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
       return hardware_interface::CallbackReturn::ERROR;
     }
 
-    uint8_t finger_id =
-      static_cast<uint8_t>(std::stoi(joint.parameters.at("finger_id"), nullptr, 0));
-    if (finger_id < 1 || finger_id > DEXHAND21S_JOINT_COUNT)
+    const auto finger_id_it = joint.parameters.find("finger_id");
+    if (finger_id_it == joint.parameters.end())
     {
       RCLCPP_FATAL(
-        get_logger(), "Joint '%s' has invalid finger_id: %d. Expected values 1, 2, and 3.",
+        get_logger(), "Joint '%s' is missing the 'finger_id' parameter.", joint.name.c_str());
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    const int finger_id = std::atoi(finger_id_it->second.c_str());
+    if (finger_id < 1 || finger_id > static_cast<int>(DEXHAND21S_JOINT_COUNT))
+    {
+      RCLCPP_FATAL(
+        get_logger(), "Joint '%s' has invalid finger_id '%s'. Expected 1, 2 or 3.",
+        joint.name.c_str(), finger_id_it->second.c_str());
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    if (!joint_position_itfs_[finger_id - 1].empty())
+    {
+      RCLCPP_FATAL(
+        get_logger(), "Joint '%s' has finger_id %d, which is already used by another joint.",
         joint.name.c_str(), finger_id);
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -210,22 +231,23 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_init(
     RCLCPP_INFO(get_logger(), "Joint '%s' -> finger_id: %d", joint.name.c_str(), finger_id);
   }
 
-  const auto device_ = DexRobot::Dex021::DexHand::createInstance(
-    DexRobot::Dex021::ProductType::DX021_S, DexRobot::Dex021::AdapterType::ZLG_MINI, 0);
-  hand_ = std::dynamic_pointer_cast<DexRobot::Dex021::DexHand_021S>(device_);
-
-  if (!hand_)
-  {
-    RCLCPP_FATAL(get_logger(), "Failed to create DexHand instance.");
-    return hardware_interface::CallbackReturn::ERROR;
-  }
-
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
+  // Probes the USB adapter, so it belongs here and not in on_init.
+  hand_ = std::dynamic_pointer_cast<DexRobot::Dex021::DexHand_021S>(
+    DexRobot::Dex021::DexHand::createInstance(
+      DexRobot::Dex021::ProductType::DX021_S, DexRobot::Dex021::AdapterType::ZLG_MINI, 0));
+  if (!hand_)
+  {
+    RCLCPP_FATAL(
+      get_logger(), "Failed to create DexHand instance. Is the CANFD adapter connected?");
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
   DexRobot::Dex021::DH21StatusRxCallBack callback =
     std::bind(&DexHand21sHardwareInterface::stateCallbackFunc, this, std::placeholders::_1);
   hand_->setStatusRxCallback(callback);
@@ -251,6 +273,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_configure(
   auto firmwareVersion = hand_->getFirmwareVersion(device_id_, 0x00);
   RCLCPP_INFO(get_logger(), "Firmware version = %d", firmwareVersion);
 
+  last_status_ns_ = now_ns();
   RCLCPP_INFO(get_logger(), "Successfully connected and configured!");
 
   return CallbackReturn::SUCCESS;
@@ -278,6 +301,7 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_activate(
     set_command(joint_position_itfs_[i], joint_position_states_[i]);
   }
 
+  failed_writes_ = 0;
   RCLCPP_INFO(get_logger(), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -297,7 +321,9 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_cleanup(
 {
   hand_->clearFirmwareError(device_id_, 0x00);
 
-  if (!hand_->disconnect())
+  const bool disconnected = hand_->disconnect();
+  hand_.reset();
+  if (!disconnected)
   {
     RCLCPP_ERROR(get_logger(), "Failed to disconnect from Dex Hand.");
     return hardware_interface::CallbackReturn::ERROR;
@@ -310,6 +336,15 @@ hardware_interface::CallbackReturn DexHand21sHardwareInterface::on_cleanup(
 hardware_interface::return_type DexHand21sHardwareInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  const double since_status_s = static_cast<double>(now_ns() - last_status_ns_) * 1e-9;
+  if (since_status_s > status_timeout_s_)
+  {
+    RCLCPP_ERROR_THROTTLE(
+      get_logger(), *get_clock(), 1000, "No status from the hand for %.2f s (timeout %.2f s).",
+      since_status_s, status_timeout_s_);
+    return hardware_interface::return_type::ERROR;
+  }
+
   for (size_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
     set_state(joint_position_itfs_[i], joint_position_states_[i]);
@@ -323,6 +358,7 @@ hardware_interface::return_type DexHand21sHardwareInterface::read(
 hardware_interface::return_type DexHand21sHardwareInterface::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  bool all_sent = true;
   for (uint8_t i = 0; i < DEXHAND21S_JOINT_COUNT; ++i)
   {
     const double cmd = get_command(joint_position_itfs_[i]);
@@ -332,11 +368,22 @@ hardware_interface::return_type DexHand21sHardwareInterface::write(
     }
     uint8_t finger_id = i + 1;
     int16_t hall_val = radToHall(finger_id, cmd);
-    hand_->moveFinger(
-      device_id_, static_cast<int16_t>(finger_id), 0x03, hall_val, angular_velocity_ * 100,
-      DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10);
+    if (!hand_->moveFinger(
+          device_id_, finger_id, 0x03, hall_val, static_cast<int16_t>(finger_speed_deg_s_ * 100),
+          DexRobot::HALL_POSLIMIT_CONTROL_MODE, 10))
+    {
+      all_sent = false;
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 1000, "Failed to send command to finger %d.", finger_id);
+    }
   }
 
+  failed_writes_ = all_sent ? 0 : failed_writes_ + 1;
+  if (failed_writes_ >= MAX_FAILED_WRITES)
+  {
+    RCLCPP_ERROR(get_logger(), "%u consecutive write cycles failed.", failed_writes_);
+    return hardware_interface::return_type::ERROR;
+  }
   return hardware_interface::return_type::OK;
 }
 

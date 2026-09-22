@@ -18,6 +18,8 @@
 
 #include "hardware_interface/resource_manager.hpp"
 #include "hardware_interface/system_interface.hpp"
+#include "hardware_interface/types/lifecycle_state_names.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "ros2_control_test_assets/descriptions.hpp"
@@ -28,10 +30,14 @@ const char kPlugin[] = "dexhand21s_hardware_interface/DexHand21sHardwareInterfac
 
 std::string joint(const std::string & name, int finger_id, bool all_states = true)
 {
-  std::string s = "<joint name=\"" + name + "\">\n<param name=\"finger_id\">" +
-                  std::to_string(finger_id) +
-                  "</param>\n<command_interface name=\"position\"/>\n"
-                  "<state_interface name=\"position\"/>\n";
+  std::string s = "<joint name=\"" + name + "\">\n";
+  if (finger_id > 0)
+  {
+    s += "<param name=\"finger_id\">" + std::to_string(finger_id) + "</param>\n";
+  }
+  s +=
+    "<command_interface name=\"position\"/>\n"
+    "<state_interface name=\"position\"/>\n";
   if (all_states)
   {
     s +=
@@ -79,10 +85,36 @@ TEST(TestDexHand21sHardwareInterface, rejects_missing_state_interfaces)
     description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 3, false))));
 }
 
-// Valid description without the CANFD adapter plugged in: init must fail cleanly, not crash.
+TEST(TestDexHand21sHardwareInterface, rejects_missing_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 0))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_duplicate_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 2))));
+}
+
+TEST(TestDexHand21sHardwareInterface, rejects_out_of_range_finger_id)
+{
+  auto rm = make_rm();
+  EXPECT_FALSE(rm.load_and_initialize_components(
+    description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 4))));
+}
+
+// Valid description without the CANFD adapter plugged in: init succeeds (no hardware access),
+// configure fails cleanly instead of crashing.
 TEST(TestDexHand21sHardwareInterface, valid_description_without_hardware)
 {
   auto rm = make_rm();
-  EXPECT_NO_THROW(rm.load_and_initialize_components(
+  ASSERT_TRUE(rm.load_and_initialize_components(
     description(joint("joint1", 1) + joint("joint2", 2) + joint("joint3", 3))));
+  rclcpp_lifecycle::State inactive(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+    hardware_interface::lifecycle_state_names::INACTIVE);
+  EXPECT_EQ(rm.set_component_state("DexHand21s", inactive), hardware_interface::return_type::ERROR);
 }
