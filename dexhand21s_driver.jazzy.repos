@@ -1,5 +1,5 @@
 repositories:
   dexhand_vendor:
     type: git
-    url: git@github.com:b-robotized/dexhand_vendor.git
+    url: https://github.com/b-robotized/dexhand_vendor.git
     version: master

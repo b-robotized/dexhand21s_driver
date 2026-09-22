@@ -2,8 +2,25 @@
 
 ros2 control hardware interface for DexRobot 21s hand.
 
+```bash
 Pluginlib-Library: dexhand21s_hardware_interface
 Plugin: dexhand21s_hardware_interface/DexHand21sHardwareInterface (hardware_interface::SystemInterface)
+```
+
+## Installation
+
+The SDK is wrapped in the `dexhand_vendor` package, which is not in rosdistro. Import it with the `.repos` file:
+
+```bash
+cd <ws>/src
+git clone https://github.com/b-robotized/dexhand21s_driver.git
+vcs import < dexhand21s_driver/dexhand21s_driver.jazzy.repos
+cd <ws>
+rosdep install --from-paths src --ignore-src -y
+colcon build --symlink-install
+```
+
+The ZLG USB-CANFD adapter needs a udev rule or root to be accessible.
 
 ## Testing
 
